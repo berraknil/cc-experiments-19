@@ -4,7 +4,9 @@ const random = require('canvas-sketch-util/random');
 const palettes = require('nice-color-palettes');
 
 const settings = {
-  dimensions: [2048, 2048]
+  dimensions: [256, 256],
+  animate: true,
+  duration: 10
 };
 
 const sketch = () => {
@@ -13,7 +15,7 @@ const sketch = () => {
 
   const createGrid = () => {
     const points = [];
-    const count = 10;
+    const count = 50;
     for (let x = 0; x < count; x++) {
       for (let y = 0; y < count; y++) {
         const u = count <= 1 ? 0.5 : x / (count - 1);
@@ -32,10 +34,13 @@ const sketch = () => {
 
   // random.setSeed(512);
   const points = createGrid().filter(() => random.value() > 0.5);
-  const margin = 200;
-  return ({ context, width, height }) => {
+  const margin = 20;
+  return ({ context, width, height, playhead }) => {
     context.fillStyle = 'white';
     context.fillRect(0, 0, width, height);
+
+    // Get a seamless 0..1 value for our loop
+    const t = Math.sin(playhead * Math.PI);
 
     points.forEach(data => {
       const { position, radius, color, rotation } = data;
@@ -52,8 +57,8 @@ const sketch = () => {
       context.fillStyle = color;
       context.font = `${radius * width}px "Helvetica"`;
       context.translate(x, y);
-      context.rotate(rotation);
-      context.fillText('=', 0, 0);
+      context.rotate(rotation * t * 10);
+      context.fillText('-', 0, 0);
 
       context.restore();
     });
